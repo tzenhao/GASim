@@ -1,0 +1,88 @@
+mtg-simulator/
+├── src/
+│   ├── core/
+│   │   ├── game/
+│   │   │   ├── Game.ts                 # Main game state manager
+│   │   │   ├── Player.ts               # Player state and actions
+│   │   │   ├── Turn.ts                 # Turn structure and phases
+│   │   │   ├── Priority.ts             # Priority system
+│   │   │   └── GameActions.ts          # Legal action validation
+│   │   │
+│   │   ├── cards/
+│   │   │   ├── Card.ts                 # Base card class
+│   │   │   ├── CardTypes.ts            # Creature, Instant, Sorcery, etc.
+│   │   │   ├── Abilities.ts            # Ability definitions
+│   │   │   └── CardDatabase.ts         # Card data loader
+│   │   │
+│   │   ├── zones/
+│   │   │   ├── Zone.ts                 # Base zone class
+│   │   │   ├── Library.ts              # Deck zone
+│   │   │   ├── Hand.ts                 # Hand zone
+│   │   │   ├── Battlefield.ts          # In-play zone
+│   │   │   ├── Graveyard.ts            # Graveyard zone
+│   │   │   ├── Exile.ts                # Exile zone
+│   │   │   └── Stack.ts                # Stack for spells/abilities
+│   │   │
+│   │   ├── rules/
+│   │   │   ├── RulesEngine.ts          # Core rules processor
+│   │   │   ├── StateBasedActions.ts    # SBA checker
+│   │   │   ├── CostPayment.ts          # Mana and other costs
+│   │   │   ├── CombatRules.ts          # Combat system
+│   │   │   └── TargetingRules.ts       # Target validation
+│   │   │
+│   │   ├── effects/
+│   │   │   ├── Effect.ts               # Base effect class
+│   │   │   ├── ContinuousEffects.ts    # Layer system
+│   │   │   ├── ReplacementEffects.ts   # Replacement effects
+│   │   │   └── TriggeredAbilities.ts   # Trigger system
+│   │   │
+│   │   └── mana/
+│   │       ├── ManaPool.ts             # Player's mana pool
+│   │       ├── ManaAbility.ts          # Mana generation
+│   │       └── ManaCost.ts             # Cost representation
+│   │
+│   ├── ui/
+│   │   ├── components/
+│   │   │   ├── GameBoard.tsx           # Main game view
+│   │   │   ├── PlayerArea.tsx          # Player's side of board
+│   │   │   ├── CardDisplay.tsx         # Card rendering
+│   │   │   ├── HandView.tsx            # Hand viewer
+│   │   │   ├── BattlefieldView.tsx     # Battlefield grid
+│   │   │   ├── StackView.tsx           # Stack display
+│   │   │   └── PhaseIndicator.tsx      # Current phase/step
+│   │   │
+│   │   └── interactions/
+│   │       ├── CardDragDrop.ts         # Drag/drop handling
+│   │       ├── TargetSelector.ts       # Target selection UI
+│   │       ├── ActionPrompt.ts         # Player prompts
+│   │       └── PriorityIndicator.ts    # Who has priority
+│   │
+│   ├── network/
+│   │   ├── GameServer.ts               # Server logic
+│   │   ├── GameClient.ts               # Client connection
+│   │   ├── MessageProtocol.ts          # Game state sync
+│   │   └── ActionValidation.ts         # Server-side validation
+│   │
+│   └── data/
+│       ├── cards/                      # Card definitions (JSON)
+│       ├── rules/                      # Rules text/data
+│       └── formats/                    # Format definitions
+│
+├── tests/
+│   ├── core/
+│   │   ├── rules.test.ts
+│   │   ├── combat.test.ts
+│   │   └── stack.test.ts
+│   │
+│   └── integration/
+│       └── gameplay.test.ts
+│
+├── assets/
+│   ├── card-images/
+│   ├── icons/
+│   └── sounds/
+│
+└── docs/
+    ├── architecture.md
+    ├── rules-implementation.md
+    └── card-data-format.md
