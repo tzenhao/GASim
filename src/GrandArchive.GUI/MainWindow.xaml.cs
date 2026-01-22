@@ -26,6 +26,10 @@ namespace GrandArchive.GUI
         private List<GameCard> _player2Memory = new();
         private List<GameCard> _player1Graveyard = new();
         private List<GameCard> _player2Graveyard = new();
+        private List<GameCard> _player1MaterialDeck = new();
+        private List<GameCard> _player2MaterialDeck = new();
+        private List<GameCard> _player1Banishment = new();
+        private List<GameCard> _player2Banishment = new();
         
         private int _turnNumber = 1;
         private int _currentPlayer = 1;
@@ -33,6 +37,12 @@ namespace GrandArchive.GUI
         private bool _isLoading = true;
         
         private readonly string[] _phases = new[] { "WakeUp", "Materialize", "Recollection", "Draw", "Main", "Combat", "End" };
+        
+        // Drag and drop state
+        private GameCard? _draggedCard;
+        private string? _dragSourceZone;
+        private Point _dragStartPoint;
+        private bool _isDragging;
 
         public MainWindow()
         {
@@ -106,6 +116,10 @@ namespace GrandArchive.GUI
             _player2Memory.Clear();
             _player1Graveyard.Clear();
             _player2Graveyard.Clear();
+            _player1MaterialDeck.Clear();
+            _player2MaterialDeck.Clear();
+            _player1Banishment.Clear();
+            _player2Banishment.Clear();
 
             // Build decks for both players
             var (champion1, deck1) = _database.BuildRandomDeck("lorraine-wandering-warrior");
@@ -189,22 +203,32 @@ namespace GrandArchive.GUI
             // Update player 1 (bottom)
             PlayerNameText.Text = "Player 1";
             UpdateChampionDisplay(_player1Champion, PlayerChampionName, PlayerChampionPower, PlayerChampionLife, PlayerLevelText, PlayerChampionBorder);
-            PlayerDeckCount.Text = _player1Deck.Count.ToString();
-            PlayerMemoryCount.Text = _player1Memory.Count.ToString();
-            PlayerGraveyardCount.Text = _player1Graveyard.Count.ToString();
+            PlayerDeckCount.Text = $"({_player1Deck.Count})";
+            PlayerMaterialDeckCount.Text = $"({_player1MaterialDeck.Count})";
+            PlayerMemoryCount.Text = $"({_player1Memory.Count})";
+            PlayerGraveyardCount.Text = $"({_player1Graveyard.Count})";
+            PlayerBanishmentCount.Text = $"({_player1Banishment.Count})";
+            UpdateZoneTopCard(PlayerGraveyardTopCard, PlayerGraveyardEmpty, _player1Graveyard);
+            UpdateZoneTopCard(PlayerBanishmentTopCard, PlayerBanishmentEmpty, _player1Banishment);
+            UpdateMemoryDisplay(PlayerMemoryPanel, _player1Memory);
             PlayerHandCount.Text = $"({_player1Hand.Count})";
-            UpdateHandDisplay(PlayerHandPanel, _player1Hand, false);
-            UpdateFieldDisplay(PlayerFieldPanel, _player1Field);
+            UpdateHandDisplay(PlayerHandPanel, _player1Hand, false, "PlayerHand");
+            UpdateFieldDisplay(PlayerFieldPanel, _player1Field, "PlayerField");
 
             // Update player 2 (top/opponent)
             OpponentNameText.Text = "Player 2";
             UpdateChampionDisplay(_player2Champion, OpponentChampionName, OpponentChampionPower, OpponentChampionLife, OpponentLevelText, OpponentChampionBorder);
-            OpponentDeckCount.Text = _player2Deck.Count.ToString();
-            OpponentMemoryCount.Text = _player2Memory.Count.ToString();
-            OpponentGraveyardCount.Text = _player2Graveyard.Count.ToString();
+            OpponentDeckCount.Text = $"({_player2Deck.Count})";
+            OpponentMaterialDeckCount.Text = $"({_player2MaterialDeck.Count})";
+            OpponentMemoryCount.Text = $"({_player2Memory.Count})";
+            OpponentGraveyardCount.Text = $"({_player2Graveyard.Count})";
+            OpponentBanishmentCount.Text = $"({_player2Banishment.Count})";
+            UpdateZoneTopCard(OpponentGraveyardTopCard, OpponentGraveyardEmpty, _player2Graveyard);
+            UpdateZoneTopCard(OpponentBanishmentTopCard, OpponentBanishmentEmpty, _player2Banishment);
+            UpdateMemoryDisplay(OpponentMemoryPanel, _player2Memory);
             OpponentHandCount.Text = $"({_player2Hand.Count})";
-            UpdateHandDisplay(OpponentHandPanel, _player2Hand, true);
-            UpdateFieldDisplay(OpponentFieldPanel, _player2Field);
+            UpdateHandDisplay(OpponentHandPanel, _player2Hand, true, "OpponentHand");
+            UpdateFieldDisplay(OpponentFieldPanel, _player2Field, "OpponentField");
 
             // Update stack
             StackCountText.Text = "Empty";
@@ -262,27 +286,150 @@ namespace GrandArchive.GUI
             }
         }
 
-        private void UpdateHandDisplay(ItemsControl handPanel, List<GameCard> hand, bool faceDown)
+        private void UpdateHandDisplay(ItemsControl handPanel, List<GameCard> hand, bool faceDown, string zoneName)
         {
             handPanel.Items.Clear();
             foreach (var card in hand)
             {
-                var cardElement = CreateCardElement(card, faceDown);
+                var cardElement = CreateCardElement(card, faceDown, zoneName);
                 handPanel.Items.Add(cardElement);
             }
         }
 
-        private void UpdateFieldDisplay(ItemsControl fieldPanel, List<GameCard> field)
+        private void UpdateMemoryDisplay(ItemsControl memoryPanel, List<GameCard> memory)
+        {
+            memoryPanel.Items.Clear();
+            foreach (var card in memory)
+            {
+                // Memory cards are always face-down (used to pay costs)
+                var cardElement = CreateMemoryCardElement(card);
+                memoryPanel.Items.Add(cardElement);
+            }
+        }
+
+        private Border CreateMemoryCardElement(GameCard card)
+        {
+            var border = new Border
+            {
+                Width = 60,
+                Height = 84,
+                Margin = new Thickness(2),
+                CornerRadius = new CornerRadius(4),
+                BorderThickness = new Thickness(1),
+                BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#58A6FF")),
+                Cursor = Cursors.Hand,
+                Tag = card
+            };
+
+            // Face-down card with blue tint (memory color)
+            border.Background = new LinearGradientBrush(
+                (Color)ColorConverter.ConvertFromString("#1a2a4e"),
+                (Color)ColorConverter.ConvertFromString("#162040"),
+                45);
+
+            var backText = new TextBlock
+            {
+                Text = "🂠",
+                FontSize = 22,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#58A6FF"))
+            };
+            border.Child = backText;
+
+            // Hover to preview the actual card (player can see their own memory)
+            border.MouseEnter += (s, e) =>
+            {
+                border.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
+                if (border.Tag is GameCard hoverCard)
+                {
+                    ShowCardHoverPreview(hoverCard);
+                }
+            };
+            border.MouseLeave += (s, e) =>
+            {
+                border.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#58A6FF"));
+                HideCardHoverPreview();
+            };
+
+            return border;
+        }
+
+        private void UpdateFieldDisplay(ItemsControl fieldPanel, List<GameCard> field, string zoneName)
         {
             fieldPanel.Items.Clear();
             foreach (var card in field)
             {
-                var cardElement = CreateCardElement(card, false);
+                var cardElement = CreateCardElement(card, false, zoneName);
                 fieldPanel.Items.Add(cardElement);
             }
         }
 
-        private Border CreateCardElement(GameCard card, bool faceDown)
+        private void UpdateZoneTopCard(Border topCardBorder, Border emptyBorder, List<GameCard> zone)
+        {
+            if (zone.Count > 0)
+            {
+                var topCard = zone[^1]; // Last card (most recent)
+                emptyBorder.Visibility = Visibility.Collapsed;
+                topCardBorder.Visibility = Visibility.Visible;
+
+                // Load the card image
+                if (!string.IsNullOrEmpty(topCard.ImagePath) && File.Exists(topCard.ImagePath))
+                {
+                    try
+                    {
+                        var bitmap = new BitmapImage();
+                        bitmap.BeginInit();
+                        bitmap.UriSource = new Uri(topCard.ImagePath);
+                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmap.DecodePixelWidth = 140;
+                        bitmap.EndInit();
+
+                        topCardBorder.Background = new ImageBrush(bitmap)
+                        {
+                            Stretch = Stretch.UniformToFill
+                        };
+                    }
+                    catch
+                    {
+                        topCardBorder.Background = GetElementGradient(topCard.Element);
+                    }
+                }
+                else
+                {
+                    topCardBorder.Background = GetElementGradient(topCard.Element);
+                }
+
+                // Add hover preview for the top card
+                topCardBorder.Tag = topCard;
+                topCardBorder.Cursor = Cursors.Hand;
+                topCardBorder.MouseEnter -= ZoneTopCard_MouseEnter;
+                topCardBorder.MouseLeave -= ZoneTopCard_MouseLeave;
+                topCardBorder.MouseEnter += ZoneTopCard_MouseEnter;
+                topCardBorder.MouseLeave += ZoneTopCard_MouseLeave;
+            }
+            else
+            {
+                emptyBorder.Visibility = Visibility.Visible;
+                topCardBorder.Visibility = Visibility.Collapsed;
+                topCardBorder.Background = null;
+            }
+        }
+
+        private void ZoneTopCard_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (sender is Border border && border.Tag is GameCard card)
+            {
+                ShowCardHoverPreview(card);
+            }
+        }
+
+        private void ZoneTopCard_MouseLeave(object sender, MouseEventArgs e)
+        {
+            HideCardHoverPreview();
+        }
+
+        private Border CreateCardElement(GameCard card, bool faceDown, string sourceZone = "")
         {
             var border = new Border
             {
@@ -293,8 +440,12 @@ namespace GrandArchive.GUI
                 BorderThickness = new Thickness(2),
                 BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#30363D")),
                 Cursor = Cursors.Hand,
-                Tag = card
+                Tag = card,
+                AllowDrop = false
             };
+            
+            // Store source zone in card for drag operations
+            card.CurrentZone = sourceZone;
 
             if (faceDown)
             {
@@ -457,22 +608,65 @@ namespace GrandArchive.GUI
                 grid.Children.Add(infoBorder);
 
                 border.Child = grid;
-                border.MouseLeftButtonDown += CardElement_Click;
             }
 
             border.MouseEnter += (s, e) =>
             {
-                border.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
-                if (!faceDown && border.Tag is GameCard hoverCard)
+                if (!_isDragging)
                 {
-                    ShowCardHoverPreview(hoverCard);
+                    border.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
+                    if (!faceDown && border.Tag is GameCard hoverCard)
+                    {
+                        ShowCardHoverPreview(hoverCard);
+                    }
                 }
             };
             border.MouseLeave += (s, e) =>
             {
-                border.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#30363D"));
-                HideCardHoverPreview();
+                if (!_isDragging)
+                {
+                    border.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#30363D"));
+                    HideCardHoverPreview();
+                }
             };
+            
+            // Drag support - only for player's cards and non-face-down opponent cards
+            if (!string.IsNullOrEmpty(sourceZone) && sourceZone.StartsWith("Player"))
+            {
+                border.MouseLeftButtonDown += (s, e) =>
+                {
+                    _dragStartPoint = e.GetPosition(this);
+                    _draggedCard = card;
+                    _dragSourceZone = sourceZone;
+                };
+                
+                border.MouseMove += (s, e) =>
+                {
+                    if (e.LeftButton == MouseButtonState.Pressed && _draggedCard == card && !_isDragging)
+                    {
+                        var currentPos = e.GetPosition(this);
+                        var diff = _dragStartPoint - currentPos;
+                        
+                        if (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
+                            Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance)
+                        {
+                            _isDragging = true;
+                            var data = new DataObject("GameCard", card);
+                            data.SetData("SourceZone", _dragSourceZone);
+                            DragDrop.DoDragDrop(border, data, DragDropEffects.Move);
+                            _isDragging = false;
+                            _draggedCard = null;
+                            _dragSourceZone = null;
+                        }
+                    }
+                };
+                
+                border.MouseLeftButtonUp += (s, e) =>
+                {
+                    _draggedCard = null;
+                    _dragSourceZone = null;
+                };
+            }
 
             return border;
         }
@@ -561,22 +755,18 @@ namespace GrandArchive.GUI
                     bitmap.BeginInit();
                     bitmap.UriSource = new Uri(card.ImagePath);
                     bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.DecodePixelWidth = 400;
                     bitmap.EndInit();
 
-                    HoverCardImage.Background = new ImageBrush(bitmap)
-                    {
-                        Stretch = Stretch.UniformToFill
-                    };
+                    HoverCardImage.Source = bitmap;
                 }
                 catch
                 {
-                    HoverCardImage.Background = GetElementGradient(card.Element);
+                    HoverCardImage.Source = null;
                 }
             }
             else
             {
-                HoverCardImage.Background = GetElementGradient(card.Element);
+                HoverCardImage.Source = null;
             }
 
             // Show the preview panel elements
@@ -589,6 +779,7 @@ namespace GrandArchive.GUI
         {
             CardPreviewPlaceholder.Visibility = Visibility.Visible;
             HoverCardImage.Visibility = Visibility.Collapsed;
+            HoverCardImage.Source = null;
             CardPreviewInfo.Visibility = Visibility.Collapsed;
         }
 
@@ -630,55 +821,21 @@ namespace GrandArchive.GUI
             };
         }
 
-        private void CardElement_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (sender is Border border && border.Tag is GameCard card)
-            {
-                ShowCardDetail(card);
-            }
-        }
-
         private void Card_Click(object sender, MouseButtonEventArgs e)
         {
-            // Handle champion card clicks
+            // Handle champion card clicks - show in hover preview
             if (sender is Border border)
             {
                 var tag = border.Tag?.ToString();
                 if (tag == "PlayerChampion" && _player1Champion != null)
                 {
-                    ShowCardDetail(_player1Champion);
+                    ShowCardHoverPreview(_player1Champion);
                 }
                 else if (tag == "OpponentChampion" && _player2Champion != null)
                 {
-                    ShowCardDetail(_player2Champion);
+                    ShowCardHoverPreview(_player2Champion);
                 }
             }
-        }
-
-        private void ShowCardDetail(GameCard card)
-        {
-            DetailCardName.Text = card.Name;
-            DetailCardType.Text = $"{card.CardType} • {card.Element ?? "Norm"}";
-            DetailCardCost.Text = card.Cost.ToString();
-
-            if (card.IsUnit)
-            {
-                DetailStatsPanel.Visibility = Visibility.Visible;
-                DetailCardPower.Text = card.EffectivePower.ToString();
-                DetailCardLife.Text = card.EffectiveLife.ToString();
-            }
-            else
-            {
-                DetailStatsPanel.Visibility = Visibility.Collapsed;
-            }
-
-            DetailCardEffect.Text = card.Effect ?? "No effect text.";
-            CardDetailPopup.Visibility = Visibility.Visible;
-        }
-
-        private void CloseCardDetail_Click(object sender, RoutedEventArgs e)
-        {
-            CardDetailPopup.Visibility = Visibility.Collapsed;
         }
 
         private void NewGameButton_Click(object sender, RoutedEventArgs e)
@@ -765,6 +922,139 @@ namespace GrandArchive.GUI
         {
             DrawCardButton_Click(sender, new RoutedEventArgs());
         }
+
+        #region Drag and Drop
+        
+        private void Zone_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent("GameCard"))
+            {
+                e.Effects = DragDropEffects.Move;
+                if (sender is Border border)
+                {
+                    border.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
+                    border.BorderThickness = new Thickness(2);
+                }
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+            e.Handled = true;
+        }
+        
+        private void Zone_DragLeave(object sender, DragEventArgs e)
+        {
+            if (sender is Border border)
+            {
+                border.BorderBrush = (SolidColorBrush)FindResource("BorderBrush");
+                border.BorderThickness = new Thickness(1);
+            }
+        }
+        
+        private void PlayerHand_Drop(object sender, DragEventArgs e)
+        {
+            HandleDrop(e, _player1Hand, "PlayerHand");
+            ResetZoneBorder(sender);
+        }
+        
+        private void PlayerField_Drop(object sender, DragEventArgs e)
+        {
+            HandleDrop(e, _player1Field, "PlayerField");
+            ResetZoneBorder(sender);
+        }
+        
+        private void PlayerMemory_Drop(object sender, DragEventArgs e)
+        {
+            HandleDrop(e, _player1Memory, "PlayerMemory");
+            ResetZoneBorder(sender);
+        }
+        
+        private void PlayerGraveyard_Drop(object sender, DragEventArgs e)
+        {
+            HandleDrop(e, _player1Graveyard, "PlayerGraveyard");
+            ResetZoneBorder(sender);
+        }
+        
+        private void PlayerBanishment_Drop(object sender, DragEventArgs e)
+        {
+            HandleDrop(e, _player1Banishment, "PlayerBanishment");
+            ResetZoneBorder(sender);
+        }
+        
+        private void ResetZoneBorder(object sender)
+        {
+            if (sender is Border border)
+            {
+                border.BorderBrush = (SolidColorBrush)FindResource("BorderBrush");
+                border.BorderThickness = new Thickness(1);
+            }
+        }
+        
+        private void HandleDrop(DragEventArgs e, List<GameCard> targetZone, string targetZoneName)
+        {
+            if (!e.Data.GetDataPresent("GameCard")) return;
+            
+            var card = e.Data.GetData("GameCard") as GameCard;
+            var sourceZone = e.Data.GetData("SourceZone") as string;
+            
+            if (card == null || sourceZone == null) return;
+            if (sourceZone == targetZoneName) return; // Can't drop on same zone
+            
+            // Remove from source zone
+            var sourceList = GetZoneList(sourceZone);
+            if (sourceList == null) return;
+            
+            if (!sourceList.Remove(card)) return;
+            
+            // Add to target zone
+            targetZone.Add(card);
+            card.CurrentZone = targetZoneName;
+            
+            // Log the move
+            LogMessage($"Moved {card.Name} from {GetZoneDisplayName(sourceZone)} to {GetZoneDisplayName(targetZoneName)}");
+            
+            UpdateUI();
+            e.Handled = true;
+        }
+        
+        private List<GameCard>? GetZoneList(string zoneName)
+        {
+            return zoneName switch
+            {
+                "PlayerHand" => _player1Hand,
+                "PlayerField" => _player1Field,
+                "PlayerMemory" => _player1Memory,
+                "PlayerGraveyard" => _player1Graveyard,
+                "PlayerBanishment" => _player1Banishment,
+                "OpponentHand" => _player2Hand,
+                "OpponentField" => _player2Field,
+                "OpponentMemory" => _player2Memory,
+                "OpponentGraveyard" => _player2Graveyard,
+                "OpponentBanishment" => _player2Banishment,
+                _ => null
+            };
+        }
+        
+        private string GetZoneDisplayName(string zoneName)
+        {
+            return zoneName switch
+            {
+                "PlayerHand" => "Hand",
+                "PlayerField" => "Field",
+                "PlayerMemory" => "Memory",
+                "PlayerGraveyard" => "Graveyard",
+                "PlayerBanishment" => "Banishment",
+                "OpponentHand" => "Opponent's Hand",
+                "OpponentField" => "Opponent's Field",
+                "OpponentMemory" => "Opponent's Memory",
+                "OpponentGraveyard" => "Opponent's Graveyard",
+                "OpponentBanishment" => "Opponent's Banishment",
+                _ => zoneName
+            };
+        }
+        
+        #endregion
 
         private void LogMessage(string message)
         {

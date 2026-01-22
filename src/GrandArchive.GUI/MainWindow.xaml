@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:GrandArchive.GUI"
         Title="Grand Archive TCG Simulator" 
-        Height="900" Width="1600"
+        Height="1080" Width="1920"
         MinHeight="700" MinWidth="1400"
         Background="{StaticResource PrimaryDarkBrush}"
         WindowStartupLocation="CenterScreen">
@@ -285,24 +285,48 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 
-                <!-- Opponent Area (Top) -->
+                <!-- Opponent Area (Top) - Mirrored layout -->
                 <Grid Grid.Row="0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="160"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="140"/>
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
                     
-                    <!-- Opponent Info Panel -->
-                    <Border Grid.Column="0" Style="{StaticResource ZoneBorder}" Margin="0,0,12,0">
+                    <!-- Opponent Hand (top, above their field) -->
+                    <Border Grid.Row="0" Style="{StaticResource ZoneBorder}" Margin="0,0,0,8">
                         <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="OPPONENT HAND" Style="{StaticResource ZoneLabel}"/>
+                                <TextBlock x:Name="OpponentHandCount" Text="(5)" FontSize="11" 
+                                           Foreground="{StaticResource TextSecondaryBrush}" Margin="4,0,0,8"/>
+                            </StackPanel>
+                            <ItemsControl x:Name="OpponentHandPanel">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Opponent Field Area -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Left Side: Champion + Material Deck -->
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
                             <TextBlock Text="OPPONENT" Style="{StaticResource ZoneLabel}"/>
-                            <TextBlock x:Name="OpponentNameText" Text="Player 2" FontSize="14" FontWeight="Bold" 
-                                       Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="OpponentNameText" Text="Player 2" FontSize="12" FontWeight="Bold" 
+                                       Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,6"/>
                             
                             <!-- Champion Display -->
                             <Border x:Name="OpponentChampionBorder" Style="{StaticResource CardBorder}" 
-                                    Width="100" Height="140" HorizontalAlignment="Center"
+                                    Width="90" Height="126" HorizontalAlignment="Center"
                                     MouseLeftButtonDown="Card_Click" Tag="OpponentChampion">
                                 <Grid>
                                     <Grid.RowDefinitions>
@@ -319,89 +343,169 @@
                                     </Border>
                                     <Border Grid.Row="1" Background="#1A1A2E" CornerRadius="0,0,6,6" Padding="4,3">
                                         <StackPanel>
-                                            <TextBlock x:Name="OpponentChampionName" Text="Champion" FontSize="9" 
+                                            <TextBlock x:Name="OpponentChampionName" Text="Champion" FontSize="8" 
                                                        Foreground="{StaticResource TextPrimaryBrush}" 
                                                        TextTrimming="CharacterEllipsis" FontWeight="SemiBold"/>
                                             <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                                                 <Border Background="{StaticResource AccentRedBrush}" CornerRadius="2" Padding="3,1" Margin="0,0,3,0">
-                                                    <TextBlock x:Name="OpponentChampionPower" Text="0" FontSize="9" Foreground="White" FontWeight="Bold"/>
+                                                    <TextBlock x:Name="OpponentChampionPower" Text="0" FontSize="8" Foreground="White" FontWeight="Bold"/>
                                                 </Border>
                                                 <Border Background="{StaticResource AccentGreenBrush}" CornerRadius="2" Padding="3,1">
-                                                    <TextBlock x:Name="OpponentChampionLife" Text="20" FontSize="9" Foreground="White" FontWeight="Bold"/>
+                                                    <TextBlock x:Name="OpponentChampionLife" Text="20" FontSize="8" Foreground="White" FontWeight="Bold"/>
                                                 </Border>
-                                                <TextBlock Text=" LV" FontSize="8" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                                                <TextBlock x:Name="OpponentLevelText" Text="1" FontSize="9" FontWeight="Bold" 
+                                                <TextBlock Text=" LV" FontSize="7" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                                <TextBlock x:Name="OpponentLevelText" Text="1" FontSize="8" FontWeight="Bold" 
                                                            Foreground="{StaticResource AccentPurpleBrush}" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </Border>
                                 </Grid>
                             </Border>
-                        </StackPanel>
-                    </Border>
-                    
-                    <!-- Opponent Field/Hand Area -->
-                    <Grid Grid.Column="1">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        
-                        <Border Grid.Row="0" Style="{StaticResource ZoneBorder}" Margin="0,0,0,8">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="HAND" Style="{StaticResource ZoneLabel}"/>
-                                    <TextBlock x:Name="OpponentHandCount" Text="(5)" FontSize="11" 
-                                               Foreground="{StaticResource TextSecondaryBrush}" Margin="4,0,0,8"/>
+                            
+                            <!-- Material Deck (face-down stack) -->
+                            <Border Style="{StaticResource ZoneBorder}" Margin="0,8,0,0" Padding="6">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="MATERIAL" Style="{StaticResource ZoneLabel}" Margin="0"/>
+                                        <TextBlock x:Name="OpponentMaterialDeckCount" Text="(0)" FontSize="9" 
+                                                   Foreground="{StaticResource AccentPurpleBrush}" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <!-- Face-down card stack visual -->
+                                    <Grid Width="70" Height="98" HorizontalAlignment="Center">
+                                        <Border x:Name="OpponentMaterialDeckVisual" CornerRadius="4" 
+                                                BorderThickness="1" BorderBrush="{StaticResource BorderBrush}">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Color="#2D1B4E" Offset="0"/>
+                                                    <GradientStop Color="#1A1A2E" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                            <TextBlock Text="🂠" FontSize="32" HorizontalAlignment="Center" 
+                                                       VerticalAlignment="Center" Foreground="{StaticResource AccentPurpleBrush}"/>
+                                        </Border>
+                                    </Grid>
                                 </StackPanel>
-                                <ItemsControl x:Name="OpponentHandPanel">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Horizontal"/>
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                </ItemsControl>
-                            </StackPanel>
-                        </Border>
+                            </Border>
+                        </StackPanel>
                         
-                        <Border Grid.Row="1" Style="{StaticResource ZoneBorder}">
-                            <StackPanel>
-                                <TextBlock Text="FIELD" Style="{StaticResource ZoneLabel}"/>
-                                <ItemsControl x:Name="OpponentFieldPanel">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <WrapPanel/>
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                </ItemsControl>
-                            </StackPanel>
-                        </Border>
+                        <!-- Center: Memory (top) + Field -->
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Memory (top of opponent's field, closest to center) - face-down cards used to pay costs -->
+                            <Border Grid.Row="0" Style="{StaticResource ZoneBorder}" Padding="8,6" Margin="0,0,0,8">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <TextBlock Text="MEMORY" Style="{StaticResource ZoneLabel}" VerticalAlignment="Center" Margin="0"/>
+                                        <TextBlock x:Name="OpponentMemoryCount" Text="(0)" FontSize="11" 
+                                                   Foreground="{StaticResource AccentBlueBrush}" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                    </StackPanel>
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" MaxHeight="90">
+                                        <ItemsControl x:Name="OpponentMemoryPanel">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- Field -->
+                            <Border Grid.Row="1" Style="{StaticResource ZoneBorder}">
+                                <StackPanel>
+                                    <TextBlock Text="FIELD" Style="{StaticResource ZoneLabel}"/>
+                                    <ItemsControl x:Name="OpponentFieldPanel">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                        
+                        <!-- Right Side: Banishment, Deck, Graveyard -->
+                        <StackPanel Grid.Column="2" Margin="12,0,0,0">
+                            <!-- Banishment (face-up, shows top card) -->
+                            <Border Style="{StaticResource ZoneBorder}" Margin="0,0,0,6" Padding="6">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="BANISH" Style="{StaticResource ZoneLabel}" Margin="0"/>
+                                        <TextBlock x:Name="OpponentBanishmentCount" Text="(0)" FontSize="9" 
+                                                   Foreground="{StaticResource AccentRedBrush}" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Grid Width="98" Height="70" HorizontalAlignment="Center">
+                                        <Grid.LayoutTransform>
+                                            <RotateTransform Angle="-90"/>
+                                        </Grid.LayoutTransform>
+                                        <!-- Empty state -->
+                                        <Border x:Name="OpponentBanishmentEmpty" CornerRadius="4" 
+                                                BorderThickness="1" BorderBrush="{StaticResource BorderBrush}"
+                                                Background="{StaticResource TertiaryDarkBrush}" Width="70" Height="98">
+                                            <TextBlock Text="✕" FontSize="24" HorizontalAlignment="Center" 
+                                                       VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.3"/>
+                                        </Border>
+                                        <!-- Top card display -->
+                                        <Border x:Name="OpponentBanishmentTopCard" Visibility="Collapsed" CornerRadius="4" 
+                                                BorderThickness="1" BorderBrush="{StaticResource AccentRedBrush}" ClipToBounds="True" Width="70" Height="98"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- Main Deck (card backs) -->
+                            <Border Style="{StaticResource ZoneBorder}" Margin="0,0,0,6" Padding="6">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="DECK" Style="{StaticResource ZoneLabel}" Margin="0"/>
+                                        <TextBlock x:Name="OpponentDeckCount" Text="(55)" FontSize="9" 
+                                                   Foreground="{StaticResource AccentGoldBrush}" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Grid Width="70" Height="98" HorizontalAlignment="Center">
+                                        <Border x:Name="OpponentDeckVisual" CornerRadius="4" 
+                                                BorderThickness="1" BorderBrush="{StaticResource AccentGoldBrush}">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Color="#1a1a2e" Offset="0"/>
+                                                    <GradientStop Color="#16213e" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                            <TextBlock Text="🂠" FontSize="32" HorizontalAlignment="Center" 
+                                                       VerticalAlignment="Center" Foreground="{StaticResource AccentGoldBrush}"/>
+                                        </Border>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- Graveyard (face-up, shows top card) -->
+                            <Border Style="{StaticResource ZoneBorder}" Padding="6">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="GRAVE" Style="{StaticResource ZoneLabel}" Margin="0"/>
+                                        <TextBlock x:Name="OpponentGraveyardCount" Text="(0)" FontSize="9" 
+                                                   Foreground="{StaticResource TextSecondaryBrush}" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Grid Width="70" Height="98" HorizontalAlignment="Center">
+                                        <!-- Empty state -->
+                                        <Border x:Name="OpponentGraveyardEmpty" CornerRadius="4" 
+                                                BorderThickness="1" BorderBrush="{StaticResource BorderBrush}"
+                                                Background="{StaticResource TertiaryDarkBrush}">
+                                            <TextBlock Text="☠" FontSize="24" HorizontalAlignment="Center" 
+                                                       VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.3"/>
+                                        </Border>
+                                        <!-- Top card display -->
+                                        <Border x:Name="OpponentGraveyardTopCard" Visibility="Collapsed" CornerRadius="4" 
+                                                BorderThickness="1" BorderBrush="{StaticResource TextSecondaryBrush}" ClipToBounds="True"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </Grid>
-                    
-                    <!-- Opponent Zones -->
-                    <StackPanel Grid.Column="2" Margin="12,0,0,0">
-                        <Border Style="{StaticResource ZoneBorder}" Margin="0,0,0,6">
-                            <StackPanel>
-                                <TextBlock Text="DECK" Style="{StaticResource ZoneLabel}"/>
-                                <TextBlock x:Name="OpponentDeckCount" Text="55" FontSize="18" FontWeight="Bold" 
-                                           Foreground="{StaticResource AccentGoldBrush}" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                        <Border Style="{StaticResource ZoneBorder}" Margin="0,0,0,6">
-                            <StackPanel>
-                                <TextBlock Text="MEMORY" Style="{StaticResource ZoneLabel}"/>
-                                <TextBlock x:Name="OpponentMemoryCount" Text="0" FontSize="18" FontWeight="Bold" 
-                                           Foreground="{StaticResource AccentBlueBrush}" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                        <Border Style="{StaticResource ZoneBorder}">
-                            <StackPanel>
-                                <TextBlock Text="GRAVE" Style="{StaticResource ZoneLabel}"/>
-                                <TextBlock x:Name="OpponentGraveyardCount" Text="0" FontSize="18" FontWeight="Bold" 
-                                           Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
                 </Grid>
                 
                 <!-- Center Divider -->
@@ -409,22 +513,28 @@
                 
                 <!-- Player Area (Bottom) -->
                 <Grid Grid.Row="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="160"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="140"/>
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
                     
-                    <!-- Player Info Panel -->
-                    <Border Grid.Column="0" Style="{StaticResource ZoneBorder}" Margin="0,0,12,0">
-                        <StackPanel>
+                    <!-- Main Field Area -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <!-- Left Side: Champion + Material Deck -->
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
                             <TextBlock Text="YOU" Style="{StaticResource ZoneLabel}"/>
-                            <TextBlock x:Name="PlayerNameText" Text="Player 1" FontSize="14" FontWeight="Bold" 
-                                       Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
+                            <TextBlock x:Name="PlayerNameText" Text="Player 1" FontSize="12" FontWeight="Bold" 
+                                       Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,6"/>
                             
                             <!-- Champion Display -->
                             <Border x:Name="PlayerChampionBorder" Style="{StaticResource CardBorder}" 
-                                    Width="100" Height="140" HorizontalAlignment="Center"
+                                    Width="90" Height="126" HorizontalAlignment="Center"
                                     MouseLeftButtonDown="Card_Click" Tag="PlayerChampion">
                                 <Grid>
                                     <Grid.RowDefinitions>
@@ -441,91 +551,195 @@
                                     </Border>
                                     <Border Grid.Row="1" Background="#1A1A2E" CornerRadius="0,0,6,6" Padding="4,3">
                                         <StackPanel>
-                                            <TextBlock x:Name="PlayerChampionName" Text="Champion" FontSize="9" 
+                                            <TextBlock x:Name="PlayerChampionName" Text="Champion" FontSize="8" 
                                                        Foreground="{StaticResource TextPrimaryBrush}" 
                                                        TextTrimming="CharacterEllipsis" FontWeight="SemiBold"/>
                                             <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                                                 <Border Background="{StaticResource AccentRedBrush}" CornerRadius="2" Padding="3,1" Margin="0,0,3,0">
-                                                    <TextBlock x:Name="PlayerChampionPower" Text="0" FontSize="9" Foreground="White" FontWeight="Bold"/>
+                                                    <TextBlock x:Name="PlayerChampionPower" Text="0" FontSize="8" Foreground="White" FontWeight="Bold"/>
                                                 </Border>
                                                 <Border Background="{StaticResource AccentGreenBrush}" CornerRadius="2" Padding="3,1">
-                                                    <TextBlock x:Name="PlayerChampionLife" Text="20" FontSize="9" Foreground="White" FontWeight="Bold"/>
+                                                    <TextBlock x:Name="PlayerChampionLife" Text="20" FontSize="8" Foreground="White" FontWeight="Bold"/>
                                                 </Border>
-                                                <TextBlock Text=" LV" FontSize="8" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                                                <TextBlock x:Name="PlayerLevelText" Text="1" FontSize="9" FontWeight="Bold" 
+                                                <TextBlock Text=" LV" FontSize="7" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                                <TextBlock x:Name="PlayerLevelText" Text="1" FontSize="8" FontWeight="Bold" 
                                                            Foreground="{StaticResource AccentPurpleBrush}" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </Border>
                                 </Grid>
                             </Border>
-                        </StackPanel>
-                    </Border>
-                    
-                    <!-- Player Field/Hand Area -->
-                    <Grid Grid.Column="1">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        
-                        <Border Grid.Row="0" Style="{StaticResource ZoneBorder}" Margin="0,0,0,8">
-                            <StackPanel>
-                                <TextBlock Text="FIELD" Style="{StaticResource ZoneLabel}"/>
-                                <ItemsControl x:Name="PlayerFieldPanel">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <WrapPanel/>
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                </ItemsControl>
-                            </StackPanel>
-                        </Border>
-                        
-                        <Border Grid.Row="1" Style="{StaticResource ZoneBorder}">
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="HAND" Style="{StaticResource ZoneLabel}"/>
-                                    <TextBlock x:Name="PlayerHandCount" Text="(5)" FontSize="11" 
-                                               Foreground="{StaticResource TextSecondaryBrush}" Margin="4,0,0,8"/>
+                            
+                            <!-- Material Deck (face-down stack) -->
+                            <Border Style="{StaticResource ZoneBorder}" Margin="0,8,0,0" Cursor="Hand" Padding="6">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="MATERIAL" Style="{StaticResource ZoneLabel}" Margin="0"/>
+                                        <TextBlock x:Name="PlayerMaterialDeckCount" Text="(0)" FontSize="9" 
+                                                   Foreground="{StaticResource AccentPurpleBrush}" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <!-- Face-down card stack visual -->
+                                    <Grid Width="70" Height="98" HorizontalAlignment="Center">
+                                        <Border x:Name="PlayerMaterialDeckVisual" CornerRadius="4" 
+                                                BorderThickness="1" BorderBrush="{StaticResource BorderBrush}">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Color="#2D1B4E" Offset="0"/>
+                                                    <GradientStop Color="#1A1A2E" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                            <TextBlock Text="🂠" FontSize="32" HorizontalAlignment="Center" 
+                                                       VerticalAlignment="Center" Foreground="{StaticResource AccentPurpleBrush}"/>
+                                        </Border>
+                                    </Grid>
                                 </StackPanel>
-                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-                                    <ItemsControl x:Name="PlayerHandPanel">
+                            </Border>
+                        </StackPanel>
+                        
+                        <!-- Center: Field + Memory -->
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <!-- Field -->
+                            <Border x:Name="PlayerFieldZone" Grid.Row="0" Style="{StaticResource ZoneBorder}" Margin="0,0,0,8"
+                                    AllowDrop="True" Drop="PlayerField_Drop" DragOver="Zone_DragOver" DragLeave="Zone_DragLeave">
+                                <StackPanel>
+                                    <TextBlock Text="FIELD" Style="{StaticResource ZoneLabel}"/>
+                                    <ItemsControl x:Name="PlayerFieldPanel">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
-                                                <StackPanel Orientation="Horizontal"/>
+                                                <WrapPanel/>
                                             </ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
                                     </ItemsControl>
-                                </ScrollViewer>
-                            </StackPanel>
-                        </Border>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- Memory (bottom of field) - face-down cards used to pay costs -->
+                            <Border x:Name="PlayerMemoryZone" Grid.Row="1" Style="{StaticResource ZoneBorder}" Padding="8,6"
+                                    AllowDrop="True" Drop="PlayerMemory_Drop" DragOver="Zone_DragOver" DragLeave="Zone_DragLeave">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <TextBlock Text="MEMORY" Style="{StaticResource ZoneLabel}" VerticalAlignment="Center" Margin="0"/>
+                                        <TextBlock x:Name="PlayerMemoryCount" Text="(0)" FontSize="11" 
+                                                   Foreground="{StaticResource AccentBlueBrush}" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                    </StackPanel>
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" MaxHeight="90">
+                                        <ItemsControl x:Name="PlayerMemoryPanel">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                        
+                        <!-- Right Side: Banishment, Deck, Graveyard -->
+                        <StackPanel Grid.Column="2" Margin="12,0,0,0">
+                            <!-- Banishment (face-up, shows top card) -->
+                            <Border x:Name="PlayerBanishmentZone" Style="{StaticResource ZoneBorder}" Margin="0,0,0,6" Padding="6"
+                                    AllowDrop="True" Drop="PlayerBanishment_Drop" DragOver="Zone_DragOver" DragLeave="Zone_DragLeave">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="BANISH" Style="{StaticResource ZoneLabel}" Margin="0"/>
+                                        <TextBlock x:Name="PlayerBanishmentCount" Text="(0)" FontSize="9" 
+                                                   Foreground="{StaticResource AccentRedBrush}" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Grid Width="98" Height="70" HorizontalAlignment="Center">
+                                        <Grid.LayoutTransform>
+                                            <RotateTransform Angle="-90"/>
+                                        </Grid.LayoutTransform>
+                                        <!-- Empty state -->
+                                        <Border x:Name="PlayerBanishmentEmpty" CornerRadius="4" 
+                                                BorderThickness="1" BorderBrush="{StaticResource BorderBrush}"
+                                                Background="{StaticResource TertiaryDarkBrush}" Width="70" Height="98">
+                                            <TextBlock Text="✕" FontSize="24" HorizontalAlignment="Center" 
+                                                       VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.3"/>
+                                        </Border>
+                                        <!-- Top card display -->
+                                        <Border x:Name="PlayerBanishmentTopCard" Visibility="Collapsed" CornerRadius="4" 
+                                                BorderThickness="1" BorderBrush="{StaticResource AccentRedBrush}" ClipToBounds="True" Width="70" Height="98"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- Main Deck (card backs) -->
+                            <Border Style="{StaticResource ZoneBorder}" Margin="0,0,0,6" Padding="6"
+                                    MouseLeftButtonDown="Deck_Click" Cursor="Hand">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="DECK" Style="{StaticResource ZoneLabel}" Margin="0"/>
+                                        <TextBlock x:Name="PlayerDeckCount" Text="(55)" FontSize="9" 
+                                                   Foreground="{StaticResource AccentGoldBrush}" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Grid Width="70" Height="98" HorizontalAlignment="Center">
+                                        <Border x:Name="PlayerDeckVisual" CornerRadius="4" 
+                                                BorderThickness="1" BorderBrush="{StaticResource AccentGoldBrush}">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                    <GradientStop Color="#1a1a2e" Offset="0"/>
+                                                    <GradientStop Color="#16213e" Offset="1"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                            <TextBlock Text="🂠" FontSize="32" HorizontalAlignment="Center" 
+                                                       VerticalAlignment="Center" Foreground="{StaticResource AccentGoldBrush}"/>
+                                        </Border>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                            
+                            <!-- Graveyard (face-up, shows top card) -->
+                            <Border x:Name="PlayerGraveyardZone" Style="{StaticResource ZoneBorder}" Padding="6"
+                                    AllowDrop="True" Drop="PlayerGraveyard_Drop" DragOver="Zone_DragOver" DragLeave="Zone_DragLeave">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                        <TextBlock Text="GRAVE" Style="{StaticResource ZoneLabel}" Margin="0"/>
+                                        <TextBlock x:Name="PlayerGraveyardCount" Text="(0)" FontSize="9" 
+                                                   Foreground="{StaticResource TextSecondaryBrush}" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <Grid Width="70" Height="98" HorizontalAlignment="Center">
+                                        <!-- Empty state -->
+                                        <Border x:Name="PlayerGraveyardEmpty" CornerRadius="4" 
+                                                BorderThickness="1" BorderBrush="{StaticResource BorderBrush}"
+                                                Background="{StaticResource TertiaryDarkBrush}">
+                                            <TextBlock Text="☠" FontSize="24" HorizontalAlignment="Center" 
+                                                       VerticalAlignment="Center" Foreground="{StaticResource TextSecondaryBrush}" Opacity="0.3"/>
+                                        </Border>
+                                        <!-- Top card display -->
+                                        <Border x:Name="PlayerGraveyardTopCard" Visibility="Collapsed" CornerRadius="4" 
+                                                BorderThickness="1" BorderBrush="{StaticResource TextSecondaryBrush}" ClipToBounds="True"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </Grid>
                     
-                    <!-- Player Zones -->
-                    <StackPanel Grid.Column="2" Margin="12,0,0,0">
-                        <Border Style="{StaticResource ZoneBorder}" Margin="0,0,0,6" MouseLeftButtonDown="Deck_Click" Cursor="Hand">
-                            <StackPanel>
-                                <TextBlock Text="DECK" Style="{StaticResource ZoneLabel}"/>
-                                <TextBlock x:Name="PlayerDeckCount" Text="55" FontSize="18" FontWeight="Bold" 
-                                           Foreground="{StaticResource AccentGoldBrush}" HorizontalAlignment="Center"/>
+                    <!-- Hand (below the entire field) -->
+                    <Border x:Name="PlayerHandZone" Grid.Row="1" Style="{StaticResource ZoneBorder}" Margin="0,8,0,0"
+                            AllowDrop="True" Drop="PlayerHand_Drop" DragOver="Zone_DragOver" DragLeave="Zone_DragLeave">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="HAND" Style="{StaticResource ZoneLabel}"/>
+                                <TextBlock x:Name="PlayerHandCount" Text="(5)" FontSize="11" 
+                                           Foreground="{StaticResource TextSecondaryBrush}" Margin="4,0,0,8"/>
                             </StackPanel>
-                        </Border>
-                        <Border Style="{StaticResource ZoneBorder}" Margin="0,0,0,6">
-                            <StackPanel>
-                                <TextBlock Text="MEMORY" Style="{StaticResource ZoneLabel}"/>
-                                <TextBlock x:Name="PlayerMemoryCount" Text="0" FontSize="18" FontWeight="Bold" 
-                                           Foreground="{StaticResource AccentBlueBrush}" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                        <Border Style="{StaticResource ZoneBorder}">
-                            <StackPanel>
-                                <TextBlock Text="GRAVE" Style="{StaticResource ZoneLabel}"/>
-                                <TextBlock x:Name="PlayerGraveyardCount" Text="0" FontSize="18" FontWeight="Bold" 
-                                           Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                <ItemsControl x:Name="PlayerHandPanel">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </StackPanel>
+                    </Border>
                 </Grid>
             </Grid>
             
@@ -558,15 +772,11 @@
                                            HorizontalAlignment="Center" Margin="0,8,0,0" Opacity="0.5"/>
                             </StackPanel>
                             
-                            <!-- Card Image -->
-                            <Border x:Name="HoverCardImage" Visibility="Collapsed" CornerRadius="8">
-                                <Border.Background>
-                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                        <GradientStop Color="#2D1B4E" Offset="0"/>
-                                        <GradientStop Color="#1A1A2E" Offset="1"/>
-                                    </LinearGradientBrush>
-                                </Border.Background>
-                            </Border>
+                            <!-- Card Image (scales to fit while maintaining aspect ratio) -->
+                            <Image x:Name="HoverCardImage" Visibility="Collapsed" 
+                                   Stretch="Uniform" 
+                                   VerticalAlignment="Top"
+                                   Margin="4"/>
                         </Grid>
                     </Border>
                     
@@ -624,52 +834,5 @@
                 </Grid>
             </Border>
         </Grid>
-        
-        <!-- Card Detail Popup (click to view) -->
-        <Border x:Name="CardDetailPopup" Visibility="Collapsed" 
-                Background="{StaticResource SecondaryDarkBrush}"
-                BorderBrush="{StaticResource AccentGoldBrush}" BorderThickness="2"
-                CornerRadius="12" Padding="20"
-                HorizontalAlignment="Center" VerticalAlignment="Center"
-                Width="320">
-            <Border.Effect>
-                <DropShadowEffect BlurRadius="30" ShadowDepth="0" Opacity="0.8" Color="Black"/>
-            </Border.Effect>
-            <StackPanel>
-                <TextBlock x:Name="DetailCardName" Text="Card Name" FontSize="18" FontWeight="Bold" 
-                           Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
-                <TextBlock x:Name="DetailCardType" Text="Card Type" FontSize="12" 
-                           Foreground="{StaticResource AccentPurpleBrush}" Margin="0,4,0,12"/>
-                
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                    <Border Background="{StaticResource TertiaryDarkBrush}" CornerRadius="4" Padding="8,4" Margin="0,0,8,0">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Cost:" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,4,0"/>
-                            <TextBlock x:Name="DetailCardCost" Text="0" FontSize="11" FontWeight="Bold" 
-                                       Foreground="{StaticResource AccentBlueBrush}"/>
-                        </StackPanel>
-                    </Border>
-                    <Border x:Name="DetailStatsPanel" Background="{StaticResource TertiaryDarkBrush}" 
-                            CornerRadius="4" Padding="8,4">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock x:Name="DetailCardPower" Text="2" FontSize="11" FontWeight="Bold" 
-                                       Foreground="{StaticResource AccentRedBrush}"/>
-                            <TextBlock Text="/" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="2,0"/>
-                            <TextBlock x:Name="DetailCardLife" Text="3" FontSize="11" FontWeight="Bold" 
-                                       Foreground="{StaticResource AccentGreenBrush}"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-                
-                <TextBlock x:Name="DetailCardEffect" Text="Card effect text goes here..." 
-                           FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" 
-                           TextWrapping="Wrap" Margin="0,8,0,0"/>
-                
-                <Button Content="Close" Style="{StaticResource GameButton}" 
-                        HorizontalAlignment="Right" Margin="0,16,0,0"
-                        Click="CloseCardDetail_Click"/>
-            </StackPanel>
-        </Border>
-        
     </Grid>
 </Window>
