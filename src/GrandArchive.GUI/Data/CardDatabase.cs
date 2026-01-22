@@ -148,6 +148,38 @@ namespace GrandArchive.GUI.Data
         }
 
         /// <summary>
+        /// Get all regalia cards (for material deck).
+        /// </summary>
+        public IEnumerable<CardData> GetRegalia()
+        {
+            return _allCards.Where(c => c.IsRegalia);
+        }
+
+        /// <summary>
+        /// Get all champion spirit cards.
+        /// </summary>
+        public IEnumerable<CardData> GetChampionSpirits()
+        {
+            return _allCards.Where(c => c.IsChampionSpirit);
+        }
+
+        /// <summary>
+        /// Get all divine relic cards.
+        /// </summary>
+        public IEnumerable<CardData> GetDivineRelics()
+        {
+            return _allCards.Where(c => c.IsDivineRelic);
+        }
+
+        /// <summary>
+        /// Get all main deck eligible cards (non-token, non-regalia).
+        /// </summary>
+        public IEnumerable<CardData> GetMainDeckCards()
+        {
+            return _allCards.Where(c => c.IsMainDeckCard);
+        }
+
+        /// <summary>
         /// Search cards by name.
         /// </summary>
         public IEnumerable<CardData> SearchByName(string query)

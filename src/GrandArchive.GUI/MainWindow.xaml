@@ -57,6 +57,8 @@
                 
                 <!-- Controls -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="DeckBuilderButton" Content="Deck Builder" Style="{StaticResource GameButton}" 
+                            Click="DeckBuilderButton_Click" Margin="0,0,8,0"/>
                     <Button x:Name="NewGameButton" Content="New Game" Style="{StaticResource ActionButton}" 
                             Click="NewGameButton_Click" Margin="0,0,8,0"/>
                     <Button x:Name="NextPhaseButton" Content="Next Phase →" Style="{StaticResource GameButton}" 

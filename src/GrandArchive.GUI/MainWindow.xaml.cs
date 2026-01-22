@@ -43,6 +43,10 @@ namespace GrandArchive.GUI
         private string? _dragSourceZone;
         private Point _dragStartPoint;
         private bool _isDragging;
+        
+        // Player deck configurations (from deck builder)
+        private List<CardData>? _player1MaterialDeckConfig;
+        private List<CardData>? _player1MainDeckConfig;
 
         public MainWindow()
         {
@@ -121,24 +125,69 @@ namespace GrandArchive.GUI
             _player1Banishment.Clear();
             _player2Banishment.Clear();
 
-            // Build decks for both players
-            var (champion1, deck1) = _database.BuildRandomDeck("lorraine-wandering-warrior");
-            var (champion2, deck2) = _database.BuildRandomDeck("rai-storm-seer");
+            // Check if player 1 has a custom deck from deck builder
+            if (_player1MaterialDeckConfig != null && _player1MainDeckConfig != null)
+            {
+                // Use custom deck for player 1
+                // Prefer champion spirit, otherwise any champion from material deck
+                var selectedChampion = _player1MaterialDeckConfig.FirstOrDefault(c => c.IsChampionSpirit)
+                    ?? _player1MaterialDeckConfig.FirstOrDefault(c => c.IsChampion);
+                if (selectedChampion != null)
+                {
+                    _player1Champion = new GameCard(selectedChampion);
+                    _player1Champion.ImagePath = _database.GetImagePath(selectedChampion);
+                }
+                else
+                {
+                    // Fallback to any champion in database
+                    var fallbackChampion = _database.GetChampions().First();
+                    _player1Champion = new GameCard(fallbackChampion);
+                    _player1Champion.ImagePath = _database.GetImagePath(fallbackChampion);
+                }
 
-            _player1Champion = new GameCard(champion1);
-            _player1Champion.ImagePath = _database.GetImagePath(champion1);
-            
+                // Build material deck (includes champion spirit)
+                _player1MaterialDeck = _player1MaterialDeckConfig
+                    .Select(c => {
+                        var gc = new GameCard(c);
+                        gc.ImagePath = _database.GetImagePath(c);
+                        gc.OwnerId = 1;
+                        gc.ControllerId = 1;
+                        gc.CurrentZone = "MaterialDeck";
+                        return gc;
+                    }).ToList();
+
+                // Build main deck
+                _player1Deck = _player1MainDeckConfig.Select(c => {
+                    var gc = new GameCard(c);
+                    gc.ImagePath = _database.GetImagePath(c);
+                    gc.OwnerId = 1;
+                    gc.ControllerId = 1;
+                    gc.CurrentZone = "Deck";
+                    return gc;
+                }).ToList();
+
+                LogMessage("Player 1 using custom deck!");
+            }
+            else
+            {
+                // Use random deck for player 1
+                var (champion1, deck1) = _database.BuildRandomDeck("lorraine-wandering-warrior");
+                _player1Champion = new GameCard(champion1);
+                _player1Champion.ImagePath = _database.GetImagePath(champion1);
+
+                _player1Deck = deck1.Select(c => {
+                    var gc = new GameCard(c);
+                    gc.ImagePath = _database.GetImagePath(c);
+                    gc.OwnerId = 1;
+                    gc.ControllerId = 1;
+                    return gc;
+                }).ToList();
+            }
+
+            // Player 2 always uses random deck
+            var (champion2, deck2) = _database.BuildRandomDeck("rai-storm-seer");
             _player2Champion = new GameCard(champion2);
             _player2Champion.ImagePath = _database.GetImagePath(champion2);
-
-            // Create deck cards
-            _player1Deck = deck1.Select(c => {
-                var gc = new GameCard(c);
-                gc.ImagePath = _database.GetImagePath(c);
-                gc.OwnerId = 1;
-                gc.ControllerId = 1;
-                return gc;
-            }).ToList();
 
             _player2Deck = deck2.Select(c => {
                 var gc = new GameCard(c);
@@ -160,7 +209,7 @@ namespace GrandArchive.GUI
             }
 
             LogMessage("Game started!");
-            LogMessage($"{_player1Champion.Name} vs {_player2Champion.Name}");
+            LogMessage($"{_player1Champion?.Name ?? "Unknown"} vs {_player2Champion?.Name ?? "Unknown"}");
 
             UpdateUI();
         }
@@ -843,6 +892,32 @@ namespace GrandArchive.GUI
             _gameLog.Clear();
             GameLogText.Text = "";
             StartNewGame();
+        }
+
+        private void DeckBuilderButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (!_database.IsLoaded)
+            {
+                MessageBox.Show("Please wait for the card database to load.", "Database Loading", 
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var deckBuilder = new DeckBuilderWindow(_database);
+            deckBuilder.Owner = this;
+            
+            if (deckBuilder.ShowDialog() == true && deckBuilder.DeckConfirmed)
+            {
+                _player1MaterialDeckConfig = deckBuilder.ResultMaterialDeck;
+                _player1MainDeckConfig = deckBuilder.ResultMainDeck;
+                
+                LogMessage($"Deck loaded: {_player1MaterialDeckConfig?.Count ?? 0} material cards, {_player1MainDeckConfig?.Count ?? 0} main deck cards");
+                
+                // Start a new game with the custom deck
+                _gameLog.Clear();
+                GameLogText.Text = "";
+                StartNewGame();
+            }
         }
 
         private void NextPhaseButton_Click(object sender, RoutedEventArgs e)

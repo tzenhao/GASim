@@ -73,6 +73,30 @@ namespace GrandArchive.GUI.Data
         public bool IsRegalia => Types.Contains("REGALIA");
         public bool IsWeapon => Types.Contains("WEAPON");
         public bool IsDomain => Types.Contains("DOMAIN");
+        public bool IsToken => Types.Contains("TOKEN");
+        public bool IsPhantasia => Types.Contains("PHANTASIA");
+
+        /// <summary>
+        /// Divine Relic cards can only have 1 in a material deck.
+        /// Identified by "Divine Relic" keyword in effect text.
+        /// </summary>
+        public bool IsDivineRelic => Effect?.Contains("Divine Relic") == true || EffectRaw?.Contains("Divine Relic") == true;
+
+        /// <summary>
+        /// Champion Spirit - a champion with Spirit class or subtype.
+        /// Required to have at least one in a material deck.
+        /// </summary>
+        public bool IsChampionSpirit => IsChampion && (Classes.Contains("SPIRIT") || Subtypes.Contains("SPIRIT"));
+
+        /// <summary>
+        /// Can be added to material deck (regalia and champions).
+        /// </summary>
+        public bool IsMaterialDeckCard => IsRegalia || IsChampion;
+
+        /// <summary>
+        /// Can be added to main deck (non-token, non-regalia, non-champion cards).
+        /// </summary>
+        public bool IsMainDeckCard => !IsToken && !IsRegalia && !IsChampion;
 
         public string CardType => Types.FirstOrDefault() ?? "Unknown";
         public int Cost => CostMemory ?? CostReserve ?? 0;
