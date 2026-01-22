@@ -1,0 +1,675 @@
+<Window x:Class="GrandArchive.GUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:GrandArchive.GUI"
+        Title="Grand Archive TCG Simulator" 
+        Height="900" Width="1600"
+        MinHeight="700" MinWidth="1400"
+        Background="{StaticResource PrimaryDarkBrush}"
+        WindowStartupLocation="CenterScreen">
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header Bar -->
+        <Border Grid.Row="0" Background="{StaticResource SecondaryDarkBrush}" 
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1"
+                Padding="20,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Logo/Title -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="⚔" FontSize="24" Foreground="{StaticResource AccentGoldBrush}" 
+                               VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="GRAND ARCHIVE" FontSize="20" FontWeight="Bold" 
+                               Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                    <TextBlock Text="TCG SIMULATOR" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" 
+                               VerticalAlignment="Center" Margin="10,0,0,4"/>
+                </StackPanel>
+                
+                <!-- Game Info -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Border Background="{StaticResource TertiaryDarkBrush}" CornerRadius="6" Padding="12,6" Margin="8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="TURN" FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" 
+                                       VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock x:Name="TurnNumberText" Text="1" FontSize="18" FontWeight="Bold" 
+                                       Foreground="{StaticResource AccentGoldBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource TertiaryDarkBrush}" CornerRadius="6" Padding="12,6" Margin="8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="▶" FontSize="12" Foreground="{StaticResource AccentGreenBrush}" 
+                                       VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock x:Name="TurnPlayerText" Text="Player 1's Turn" FontSize="14" FontWeight="SemiBold" 
+                                       Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                
+                <!-- Controls -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="NewGameButton" Content="New Game" Style="{StaticResource ActionButton}" 
+                            Click="NewGameButton_Click" Margin="0,0,8,0"/>
+                    <Button x:Name="NextPhaseButton" Content="Next Phase →" Style="{StaticResource GameButton}" 
+                            Click="NextPhaseButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- Main Content Area with 3 columns -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="140"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="260"/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- LEFT PANEL: Phase Indicator -->
+            <Border Grid.Column="0" Background="{StaticResource SecondaryDarkBrush}" 
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="12,16">
+                        <TextBlock Text="PHASES" FontSize="11" FontWeight="SemiBold" 
+                                   Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,12"/>
+                        
+                        <!-- Wake Up Phase -->
+                        <Border x:Name="PhaseWakeUp" CornerRadius="6" Padding="10,8" Margin="0,0,0,4" Cursor="Hand"
+                                MouseLeftButtonDown="Phase_Click" Tag="WakeUp">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource TertiaryDarkBrush}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="PhaseWakeUpIndicator" Text="○" FontSize="12" 
+                                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Wake Up" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                </StackPanel>
+                                <TextBlock Text="Ready rested cards" FontSize="9" 
+                                           Foreground="{StaticResource TextSecondaryBrush}" Margin="20,2,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Materialize Phase -->
+                        <Border x:Name="PhaseMaterialize" CornerRadius="6" Padding="10,8" Margin="0,0,0,4" Cursor="Hand"
+                                MouseLeftButtonDown="Phase_Click" Tag="Materialize">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource TertiaryDarkBrush}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="PhaseMaterializeIndicator" Text="○" FontSize="12" 
+                                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Materialize" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                </StackPanel>
+                                <TextBlock Text="Play from material deck" FontSize="9" 
+                                           Foreground="{StaticResource TextSecondaryBrush}" Margin="20,2,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Recollection Phase -->
+                        <Border x:Name="PhaseRecollection" CornerRadius="6" Padding="10,8" Margin="0,0,0,4" Cursor="Hand"
+                                MouseLeftButtonDown="Phase_Click" Tag="Recollection">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource TertiaryDarkBrush}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="PhaseRecollectionIndicator" Text="○" FontSize="12" 
+                                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Recollection" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                </StackPanel>
+                                <TextBlock Text="Return memory to hand" FontSize="9" 
+                                           Foreground="{StaticResource TextSecondaryBrush}" Margin="20,2,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Draw Phase -->
+                        <Border x:Name="PhaseDraw" CornerRadius="6" Padding="10,8" Margin="0,0,0,4" Cursor="Hand"
+                                MouseLeftButtonDown="Phase_Click" Tag="Draw">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource TertiaryDarkBrush}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="PhaseDrawIndicator" Text="○" FontSize="12" 
+                                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Draw" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                </StackPanel>
+                                <TextBlock Text="Draw a card" FontSize="9" 
+                                           Foreground="{StaticResource TextSecondaryBrush}" Margin="20,2,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Main Phase -->
+                        <Border x:Name="PhaseMain" CornerRadius="6" Padding="10,8" Margin="0,0,0,4" Cursor="Hand"
+                                MouseLeftButtonDown="Phase_Click" Tag="Main">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource TertiaryDarkBrush}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="PhaseMainIndicator" Text="○" FontSize="12" 
+                                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Main Phase" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                </StackPanel>
+                                <TextBlock Text="Play cards, activate abilities" FontSize="9" 
+                                           Foreground="{StaticResource TextSecondaryBrush}" Margin="20,2,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- Combat Phase -->
+                        <Border x:Name="PhaseCombat" CornerRadius="6" Padding="10,8" Margin="0,0,0,4" Cursor="Hand"
+                                MouseLeftButtonDown="Phase_Click" Tag="Combat">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource TertiaryDarkBrush}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="PhaseCombatIndicator" Text="○" FontSize="12" 
+                                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Combat" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                </StackPanel>
+                                <TextBlock Text="Attack with units" FontSize="9" 
+                                           Foreground="{StaticResource TextSecondaryBrush}" Margin="20,2,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <!-- End Phase -->
+                        <Border x:Name="PhaseEnd" CornerRadius="6" Padding="10,8" Margin="0,0,0,4" Cursor="Hand"
+                                MouseLeftButtonDown="Phase_Click" Tag="End">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource TertiaryDarkBrush}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="PhaseEndIndicator" Text="○" FontSize="12" 
+                                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,8,0"/>
+                                    <TextBlock Text="End Phase" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{StaticResource TextPrimaryBrush}"/>
+                                </StackPanel>
+                                <TextBlock Text="Discard to hand size" FontSize="9" 
+                                           Foreground="{StaticResource TextSecondaryBrush}" Margin="20,2,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        
+                        <Separator Margin="0,12" Background="{StaticResource BorderBrush}"/>
+                        
+                        <!-- Action Buttons -->
+                        <Button x:Name="PassButton" Content="Pass Priority" Style="{StaticResource GameButton}" 
+                                Click="PassButton_Click" Margin="0,0,0,8" HorizontalAlignment="Stretch"/>
+                        <Button x:Name="DrawCardButton" Content="Draw Card" Style="{StaticResource GameButton}" 
+                                Click="DrawCardButton_Click" HorizontalAlignment="Stretch"/>
+                        
+                        <Separator Margin="0,12" Background="{StaticResource BorderBrush}"/>
+                        
+                        <!-- Stack Info -->
+                        <TextBlock Text="STACK" FontSize="11" FontWeight="SemiBold" 
+                                   Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,8"/>
+                        <Border Background="{StaticResource TertiaryDarkBrush}" CornerRadius="6" Padding="10,8">
+                            <TextBlock x:Name="StackCountText" Text="Empty" FontSize="12" 
+                                       Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center"/>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+            
+            <!-- CENTER: Game Board -->
+            <Grid Grid.Column="1" Margin="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Opponent Area (Top) -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="160"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="140"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Opponent Info Panel -->
+                    <Border Grid.Column="0" Style="{StaticResource ZoneBorder}" Margin="0,0,12,0">
+                        <StackPanel>
+                            <TextBlock Text="OPPONENT" Style="{StaticResource ZoneLabel}"/>
+                            <TextBlock x:Name="OpponentNameText" Text="Player 2" FontSize="14" FontWeight="Bold" 
+                                       Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
+                            
+                            <!-- Champion Display -->
+                            <Border x:Name="OpponentChampionBorder" Style="{StaticResource CardBorder}" 
+                                    Width="100" Height="140" HorizontalAlignment="Center"
+                                    MouseLeftButtonDown="Card_Click" Tag="OpponentChampion">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Border Grid.Row="0" CornerRadius="6,6,0,0" Margin="3,3,3,0">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#2D1B4E" Offset="0"/>
+                                                <GradientStop Color="#1A1A2E" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+                                    <Border Grid.Row="1" Background="#1A1A2E" CornerRadius="0,0,6,6" Padding="4,3">
+                                        <StackPanel>
+                                            <TextBlock x:Name="OpponentChampionName" Text="Champion" FontSize="9" 
+                                                       Foreground="{StaticResource TextPrimaryBrush}" 
+                                                       TextTrimming="CharacterEllipsis" FontWeight="SemiBold"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                <Border Background="{StaticResource AccentRedBrush}" CornerRadius="2" Padding="3,1" Margin="0,0,3,0">
+                                                    <TextBlock x:Name="OpponentChampionPower" Text="0" FontSize="9" Foreground="White" FontWeight="Bold"/>
+                                                </Border>
+                                                <Border Background="{StaticResource AccentGreenBrush}" CornerRadius="2" Padding="3,1">
+                                                    <TextBlock x:Name="OpponentChampionLife" Text="20" FontSize="9" Foreground="White" FontWeight="Bold"/>
+                                                </Border>
+                                                <TextBlock Text=" LV" FontSize="8" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                                <TextBlock x:Name="OpponentLevelText" Text="1" FontSize="9" FontWeight="Bold" 
+                                                           Foreground="{StaticResource AccentPurpleBrush}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Opponent Field/Hand Area -->
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <Border Grid.Row="0" Style="{StaticResource ZoneBorder}" Margin="0,0,0,8">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="HAND" Style="{StaticResource ZoneLabel}"/>
+                                    <TextBlock x:Name="OpponentHandCount" Text="(5)" FontSize="11" 
+                                               Foreground="{StaticResource TextSecondaryBrush}" Margin="4,0,0,8"/>
+                                </StackPanel>
+                                <ItemsControl x:Name="OpponentHandPanel">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                        
+                        <Border Grid.Row="1" Style="{StaticResource ZoneBorder}">
+                            <StackPanel>
+                                <TextBlock Text="FIELD" Style="{StaticResource ZoneLabel}"/>
+                                <ItemsControl x:Name="OpponentFieldPanel">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    
+                    <!-- Opponent Zones -->
+                    <StackPanel Grid.Column="2" Margin="12,0,0,0">
+                        <Border Style="{StaticResource ZoneBorder}" Margin="0,0,0,6">
+                            <StackPanel>
+                                <TextBlock Text="DECK" Style="{StaticResource ZoneLabel}"/>
+                                <TextBlock x:Name="OpponentDeckCount" Text="55" FontSize="18" FontWeight="Bold" 
+                                           Foreground="{StaticResource AccentGoldBrush}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource ZoneBorder}" Margin="0,0,0,6">
+                            <StackPanel>
+                                <TextBlock Text="MEMORY" Style="{StaticResource ZoneLabel}"/>
+                                <TextBlock x:Name="OpponentMemoryCount" Text="0" FontSize="18" FontWeight="Bold" 
+                                           Foreground="{StaticResource AccentBlueBrush}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource ZoneBorder}">
+                            <StackPanel>
+                                <TextBlock Text="GRAVE" Style="{StaticResource ZoneLabel}"/>
+                                <TextBlock x:Name="OpponentGraveyardCount" Text="0" FontSize="18" FontWeight="Bold" 
+                                           Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+                
+                <!-- Center Divider -->
+                <Border Grid.Row="1" Height="2" Background="{StaticResource BorderBrush}" Margin="0,12" CornerRadius="1"/>
+                
+                <!-- Player Area (Bottom) -->
+                <Grid Grid.Row="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="160"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="140"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Player Info Panel -->
+                    <Border Grid.Column="0" Style="{StaticResource ZoneBorder}" Margin="0,0,12,0">
+                        <StackPanel>
+                            <TextBlock Text="YOU" Style="{StaticResource ZoneLabel}"/>
+                            <TextBlock x:Name="PlayerNameText" Text="Player 1" FontSize="14" FontWeight="Bold" 
+                                       Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,8"/>
+                            
+                            <!-- Champion Display -->
+                            <Border x:Name="PlayerChampionBorder" Style="{StaticResource CardBorder}" 
+                                    Width="100" Height="140" HorizontalAlignment="Center"
+                                    MouseLeftButtonDown="Card_Click" Tag="PlayerChampion">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Border Grid.Row="0" CornerRadius="6,6,0,0" Margin="3,3,3,0">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                                <GradientStop Color="#1B4D2E" Offset="0"/>
+                                                <GradientStop Color="#1A1A2E" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+                                    <Border Grid.Row="1" Background="#1A1A2E" CornerRadius="0,0,6,6" Padding="4,3">
+                                        <StackPanel>
+                                            <TextBlock x:Name="PlayerChampionName" Text="Champion" FontSize="9" 
+                                                       Foreground="{StaticResource TextPrimaryBrush}" 
+                                                       TextTrimming="CharacterEllipsis" FontWeight="SemiBold"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                                <Border Background="{StaticResource AccentRedBrush}" CornerRadius="2" Padding="3,1" Margin="0,0,3,0">
+                                                    <TextBlock x:Name="PlayerChampionPower" Text="0" FontSize="9" Foreground="White" FontWeight="Bold"/>
+                                                </Border>
+                                                <Border Background="{StaticResource AccentGreenBrush}" CornerRadius="2" Padding="3,1">
+                                                    <TextBlock x:Name="PlayerChampionLife" Text="20" FontSize="9" Foreground="White" FontWeight="Bold"/>
+                                                </Border>
+                                                <TextBlock Text=" LV" FontSize="8" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                                <TextBlock x:Name="PlayerLevelText" Text="1" FontSize="9" FontWeight="Bold" 
+                                                           Foreground="{StaticResource AccentPurpleBrush}" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Player Field/Hand Area -->
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <Border Grid.Row="0" Style="{StaticResource ZoneBorder}" Margin="0,0,0,8">
+                            <StackPanel>
+                                <TextBlock Text="FIELD" Style="{StaticResource ZoneLabel}"/>
+                                <ItemsControl x:Name="PlayerFieldPanel">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
+                        
+                        <Border Grid.Row="1" Style="{StaticResource ZoneBorder}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="HAND" Style="{StaticResource ZoneLabel}"/>
+                                    <TextBlock x:Name="PlayerHandCount" Text="(5)" FontSize="11" 
+                                               Foreground="{StaticResource TextSecondaryBrush}" Margin="4,0,0,8"/>
+                                </StackPanel>
+                                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                    <ItemsControl x:Name="PlayerHandPanel">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    
+                    <!-- Player Zones -->
+                    <StackPanel Grid.Column="2" Margin="12,0,0,0">
+                        <Border Style="{StaticResource ZoneBorder}" Margin="0,0,0,6" MouseLeftButtonDown="Deck_Click" Cursor="Hand">
+                            <StackPanel>
+                                <TextBlock Text="DECK" Style="{StaticResource ZoneLabel}"/>
+                                <TextBlock x:Name="PlayerDeckCount" Text="55" FontSize="18" FontWeight="Bold" 
+                                           Foreground="{StaticResource AccentGoldBrush}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource ZoneBorder}" Margin="0,0,0,6">
+                            <StackPanel>
+                                <TextBlock Text="MEMORY" Style="{StaticResource ZoneLabel}"/>
+                                <TextBlock x:Name="PlayerMemoryCount" Text="0" FontSize="18" FontWeight="Bold" 
+                                           Foreground="{StaticResource AccentBlueBrush}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{StaticResource ZoneBorder}">
+                            <StackPanel>
+                                <TextBlock Text="GRAVE" Style="{StaticResource ZoneLabel}"/>
+                                <TextBlock x:Name="PlayerGraveyardCount" Text="0" FontSize="18" FontWeight="Bold" 
+                                           Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+            
+            <!-- RIGHT PANEL: Card Preview + Game Log -->
+            <Border Grid.Column="2" Background="{StaticResource SecondaryDarkBrush}" 
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1,0,0,0">
+                <Grid Margin="12,16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="160"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Grid.Row="0" Text="CARD PREVIEW" FontSize="11" FontWeight="SemiBold" 
+                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,12"/>
+                    
+                    <!-- Card Image Preview -->
+                    <Border x:Name="CardPreviewPanel" Grid.Row="1" 
+                            Background="{StaticResource TertiaryDarkBrush}"
+                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                            CornerRadius="8" ClipToBounds="True">
+                        <Grid>
+                            <!-- Placeholder when no card hovered -->
+                            <StackPanel x:Name="CardPreviewPlaceholder" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock Text="🂠" FontSize="48" Foreground="{StaticResource TextSecondaryBrush}" 
+                                           HorizontalAlignment="Center" Opacity="0.3"/>
+                                <TextBlock Text="Hover over a card" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" 
+                                           HorizontalAlignment="Center" Margin="0,8,0,0" Opacity="0.5"/>
+                            </StackPanel>
+                            
+                            <!-- Card Image -->
+                            <Border x:Name="HoverCardImage" Visibility="Collapsed" CornerRadius="8">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                        <GradientStop Color="#2D1B4E" Offset="0"/>
+                                        <GradientStop Color="#1A1A2E" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Card Info -->
+                    <Border x:Name="CardPreviewInfo" Grid.Row="2" Visibility="Collapsed"
+                            Background="{StaticResource TertiaryDarkBrush}" CornerRadius="8" 
+                            Padding="12" Margin="0,12,0,0">
+                        <StackPanel>
+                            <TextBlock x:Name="HoverCardName" Text="Card Name" 
+                                       FontSize="14" FontWeight="Bold" 
+                                       Foreground="{StaticResource TextPrimaryBrush}"
+                                       TextWrapping="Wrap"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                <TextBlock x:Name="HoverCardType" Text="Type" 
+                                           FontSize="10" Foreground="{StaticResource AccentPurpleBrush}"/>
+                                <TextBlock Text=" • " FontSize="10" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock x:Name="HoverCardElement" Text="Element" 
+                                           FontSize="10" Foreground="{StaticResource AccentBlueBrush}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                <Border Background="{StaticResource AccentBlueBrush}" CornerRadius="4" Padding="6,2" Margin="0,0,6,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Cost " FontSize="9" Foreground="White"/>
+                                        <TextBlock x:Name="HoverCardCost" Text="0" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border x:Name="HoverStatsPanel" Background="{StaticResource PrimaryDarkBrush}" CornerRadius="4" Padding="6,2">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock x:Name="HoverCardPower" Text="0" FontSize="9" FontWeight="Bold" 
+                                                   Foreground="{StaticResource AccentRedBrush}"/>
+                                        <TextBlock Text=" / " FontSize="9" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        <TextBlock x:Name="HoverCardLife" Text="0" FontSize="9" FontWeight="Bold" 
+                                                   Foreground="{StaticResource AccentGreenBrush}"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                            <TextBlock x:Name="HoverCardEffect" Text="" FontSize="10" 
+                                       Foreground="{StaticResource TextSecondaryBrush}" 
+                                       TextWrapping="Wrap" Margin="0,8,0,0" MaxHeight="80"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <!-- Game Log Header -->
+                    <TextBlock Grid.Row="3" Text="GAME LOG" FontSize="11" FontWeight="SemiBold" 
+                               Foreground="{StaticResource TextSecondaryBrush}" Margin="0,16,0,8"/>
+                    
+                    <!-- Game Log -->
+                    <Border Grid.Row="4" Background="{StaticResource TertiaryDarkBrush}" 
+                            CornerRadius="8" Padding="10">
+                        <ScrollViewer x:Name="GameLogScroller" VerticalScrollBarVisibility="Auto">
+                            <TextBlock x:Name="GameLogText" Text="" FontSize="10" 
+                                       Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap"/>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+        
+        <!-- Card Detail Popup (click to view) -->
+        <Border x:Name="CardDetailPopup" Visibility="Collapsed" 
+                Background="{StaticResource SecondaryDarkBrush}"
+                BorderBrush="{StaticResource AccentGoldBrush}" BorderThickness="2"
+                CornerRadius="12" Padding="20"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Width="320">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="30" ShadowDepth="0" Opacity="0.8" Color="Black"/>
+            </Border.Effect>
+            <StackPanel>
+                <TextBlock x:Name="DetailCardName" Text="Card Name" FontSize="18" FontWeight="Bold" 
+                           Foreground="{StaticResource TextPrimaryBrush}" TextWrapping="Wrap"/>
+                <TextBlock x:Name="DetailCardType" Text="Card Type" FontSize="12" 
+                           Foreground="{StaticResource AccentPurpleBrush}" Margin="0,4,0,12"/>
+                
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                    <Border Background="{StaticResource TertiaryDarkBrush}" CornerRadius="4" Padding="8,4" Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Cost:" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,4,0"/>
+                            <TextBlock x:Name="DetailCardCost" Text="0" FontSize="11" FontWeight="Bold" 
+                                       Foreground="{StaticResource AccentBlueBrush}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border x:Name="DetailStatsPanel" Background="{StaticResource TertiaryDarkBrush}" 
+                            CornerRadius="4" Padding="8,4">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="DetailCardPower" Text="2" FontSize="11" FontWeight="Bold" 
+                                       Foreground="{StaticResource AccentRedBrush}"/>
+                            <TextBlock Text="/" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="2,0"/>
+                            <TextBlock x:Name="DetailCardLife" Text="3" FontSize="11" FontWeight="Bold" 
+                                       Foreground="{StaticResource AccentGreenBrush}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                
+                <TextBlock x:Name="DetailCardEffect" Text="Card effect text goes here..." 
+                           FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" 
+                           TextWrapping="Wrap" Margin="0,8,0,0"/>
+                
+                <Button Content="Close" Style="{StaticResource GameButton}" 
+                        HorizontalAlignment="Right" Margin="0,16,0,0"
+                        Click="CloseCardDetail_Click"/>
+            </StackPanel>
+        </Border>
+        
+    </Grid>
+</Window>
