@@ -17,7 +17,13 @@ GASim/
 │   │   ├── Interfaces/         # Core interfaces
 │   │   ├── Players/            # Player implementation
 │   │   └── Zones/              # Game zone implementations
-│   └── GrandArchive.Console/   # Demo console application
+│   ├── GrandArchive.Console/   # Demo console application
+│   └── GrandArchive.GUI/       # WPF graphical interface
+│       └── Data/               # Card database and game card classes
+├── Cards/                      # Imported card JSON data (run ImportCards.ps1)
+├── CardImages/                 # Imported card images (run ImportCardImages.ps1)
+├── ImportCards.ps1             # Script to download card data from API
+├── ImportCardImages.ps1        # Script to download card images from API
 └── Simulator/                  # Legacy/simplified implementation
     ├── Classes/
     └── Shared/
@@ -57,20 +63,27 @@ GASim/
 - Damage calculation with buff counters
 - Support for keywords: Stealth, Cleave, Ambush, etc.
 
-## Running the Simulator
+## Getting Started
 
 ### Prerequisites
 - .NET 8.0 SDK or later
+- PowerShell (for importing card data)
 
-### Build and Run
+### Setup
+
+1. **Import card data from the Grand Archive API:**
+
+```powershell
+.\ImportCards.ps1
+.\ImportCardImages.ps1
+```
+
+This will download all card data and images from the [Grand Archive API](https://api.gatcg.com/). The import scripts may take a few minutes depending on your connection.
+
+2. **Run the GUI:**
 
 ```bash
-# Build the solution
-cd Simulator
-dotnet build Simulator.slnx
-
-# Run the demo
-cd ../src/GrandArchive.Console
+cd src/GrandArchive.GUI
 dotnet run
 ```
 
